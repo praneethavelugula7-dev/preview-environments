@@ -10,7 +10,8 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
 
     steps:
@@ -19,3 +20,21 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t preview-app .
+
+      - name: Run preview container
+        run: docker run -d --name preview-container -p 5000:5000 preview-app
+
+      - name: Test application
+        run: |
+          for i in {1..10}; do
+            if curl --fail http://127.0.0.1:5000/; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Application failed to respond"
+          exit 1
+
+      - name: Clean up container
+        if: always()
+        run: docker rm -f preview-container || true
