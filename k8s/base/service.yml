@@ -2,7 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: preview-app-service
-  namespace: preview-demo
 spec:
   selector:
     app: preview-app
